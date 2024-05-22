@@ -5,9 +5,33 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
-#include "PaperTileMap.h"
-#include "PaperTileSet.h"
 
+#include "DrawDebugHelpers.h"
+
+
+void UGenerateIslandComponent::DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY,
+                                        float CellSize)
+{
+	FVector LineStart, LineEnd;
+
+	// Draw horizontal lines
+	for (int32 Y = 0; Y <= NumCellsY; Y++)
+	{
+		LineStart = FVector(Origin.X, Origin.Y + Y * CellSize, Origin.Z);
+		LineEnd = FVector(Origin.X + NumCellsX * CellSize, Origin.Y + Y * CellSize, Origin.Z);
+		DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
+		);
+	}
+
+	// Draw vertical lines
+	for (int32 X = 0; X <= NumCellsX; X++)
+	{
+		LineStart = FVector(Origin.X + X * CellSize, Origin.Y, Origin.Z);
+		LineEnd = FVector(Origin.X + X * CellSize, Origin.Y + NumCellsY * CellSize, Origin.Z);
+		DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
+		);
+	}
+}
 
 // Sets default values for this component's properties
 UGenerateIslandComponent::UGenerateIslandComponent()
@@ -24,56 +48,22 @@ UGenerateIslandComponent::UGenerateIslandComponent()
 void UGenerateIslandComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	// Try to find the TileMapComponent in the owner actor
-	TileMapComponent = GetOwner()->FindComponentByClass<UPaperTileMapComponent>();
-	if (TileMapComponent == nullptr)
+	GridCells.Reserve(GridSize.X * GridSize.Y);
+	int sizeX = GridSize.X;
+	for (int x = 0; x < GridSize.X; x++)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TileMapComponent not found!"));
-		return;
+		for (int y = 0; y < GridSize.Y; y++)
+		{
+			FVector2D GridCell(x, y);
+			FCell cell{FVector{static_cast<double>(x), static_cast<double>(y), 0}};
+			GridCells.Add(cell, 0);
+		}
 	}
-
-	// Call the function to get all tiles
-	GetAllTiles();
+	DrawGrid(FVector{0, 0, 0}, GridSize.X, GridSize.Y, SizePerCell);
 }
 
 void UGenerateIslandComponent::GetAllTiles()
 {
-	if (TileMapComponent == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TileMapComponent is null!"));
-		return;
-	}
-
-	UPaperTileMap* TileMap = TileMapComponent->TileMap;
-	if (TileMap == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TileMap is null!"));
-		return;
-	}
-
-	for (int32 LayerIndex = 0; LayerIndex < TileMap->TileLayers.Num(); ++LayerIndex)
-	{
-		UPaperTileLayer* TileLayer = TileMap->TileLayers[LayerIndex];
-		if (TileLayer == nullptr)
-		{
-			continue;
-		}
-
-		for (int32 Y = 0; Y < TileMap->MapHeight; ++Y)
-		{
-			for (int32 X = 0; X < TileMap->MapWidth; ++X)
-			{
-				FPaperTileInfo Tile = TileLayer->GetCell(X, Y);
-				// Process the tile info as needed
-				UE_LOG(LogTemp, Log, TEXT("Layer: %d, Tile: (%d, %d), TileSet: %s, TileIndex: %d"),
-				       LayerIndex, X, Y,
-				       Tile.TileSet ? *Tile.TileSet->GetName() : TEXT("None"),
-				       Tile.GetTileIndex());
-			}
-		}
-	}
 }
 
 

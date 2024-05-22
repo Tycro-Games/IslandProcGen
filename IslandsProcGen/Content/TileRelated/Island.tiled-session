@@ -1,0 +1,25 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "TX Tileset Grass.tsx": {
+            "dynamicWrapping": false
+        }
+    },
+    "last.exportedFilePath": "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/TileRelated",
+    "last.imagePath": "D:/Downl/Pixel Art Top Down - Basic/Texture",
+    "map.lastUsedExportFilter": "All Files (*)",
+    "map.lastUsedFormat": "tmx",
+    "map.width": 20,
+    "openFiles": [
+    ],
+    "project": "Island.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

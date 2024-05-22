@@ -9,12 +9,46 @@
 
 #include "GenerateIslandComponent.generated.h"
 
+// Struct definition
+USTRUCT(BlueprintType)
+struct FCell
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Cell")
+	FVector Position;
+
+	// Constructors
+	FCell()
+	{
+	}
+
+	bool operator==(const FCell& Other) const
+	{
+		return Position == Other.Position;
+	}
+
+	FCell(const FVector& InLocation)
+		: Position(InLocation)
+	{
+	}
+
+
+	// Necessary for using TMap with FGridCell as a key
+	friend uint32 GetTypeHash(const FCell& Cell)
+	{
+		return GetTypeHash(Cell.Position);
+	}
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ISLANDSPROCGEN_API UGenerateIslandComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY, float CellSize);
 	// Sets default values for this component's properties
 	UGenerateIslandComponent();
 
@@ -31,6 +65,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Island Mesh")
 	TObjectPtr<UStaticMesh> StaticMeshComponent;
 
+	// Dictionary to hold grid cells
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	TMap<FCell, uint32> GridCells;
+	UPROPERTY(EditAnywhere, Category = "Grid")
+
+	FIntVector2 GridSize;
+	UPROPERTY(EditAnywhere, Category = "Grid")
+
+	float SizePerCell = 1.0f;
+
 private:
-	UPaperTileMapComponent* TileMapComponent;
 };
