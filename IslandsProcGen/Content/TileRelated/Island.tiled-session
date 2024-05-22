@@ -3,12 +3,34 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/island1.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/TX Tileset Grass.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/island1.tmx": {
+            "scale": 1.484375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 388.04210526315785,
+                "y": 352
+            }
+        },
         "TX Tileset Grass.tsx": {
-            "dynamicWrapping": false
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "island1.tmx": {
+            "scale": 1.9712500000000002,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 262.27013316423586,
+                "y": 144.8319594166138
+            }
         }
     },
     "last.exportedFilePath": "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/TileRelated",
@@ -17,9 +39,13 @@
     "map.lastUsedFormat": "tmx",
     "map.width": 20,
     "openFiles": [
+        "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/island1.tmx"
     ],
     "project": "Island.tiled-project",
     "recentFiles": [
+        "D:/Buas/Projects/UE5/IslandsProcGen/IslandProcGen/IslandsProcGen/Content/island1.tmx",
+        "island1.tmx",
+        "TX Tileset Grass.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

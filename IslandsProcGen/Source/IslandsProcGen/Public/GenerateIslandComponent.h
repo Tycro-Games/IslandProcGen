@@ -2,6 +2,8 @@
 // used chatgpt
 #pragma once
 
+#include <string>
+
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "PaperTileMapComponent.h"
@@ -41,7 +43,7 @@ struct FCell
 	}
 };
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ISLANDSPROCGEN_API UGenerateIslandComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -58,6 +60,7 @@ protected:
 
 public:
 	void GetAllTiles();
+	void LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells);
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
@@ -67,13 +70,16 @@ public:
 
 	// Dictionary to hold grid cells
 	UPROPERTY(EditAnywhere, Category = "Grid")
-	TMap<FCell, uint32> GridCells;
+	TMap<FCell, int32> GridCells;
 	UPROPERTY(EditAnywhere, Category = "Grid")
 
-	FIntVector2 GridSize;
+	FIntVector2 GridSize = {10, 10};
 	UPROPERTY(EditAnywhere, Category = "Grid")
 
-	float SizePerCell = 1.0f;
+	float SizePerCell = 200.0f;
+	UPROPERTY(EditAnywhere, Category = "Grid")
+
+	FString TilePath = "island1.tmx";
 
 private:
 };

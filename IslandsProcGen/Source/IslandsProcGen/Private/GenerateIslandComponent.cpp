@@ -7,6 +7,10 @@
 #include "Engine/Engine.h"
 
 #include "DrawDebugHelpers.h"
+#include "XmlFile.h"
+
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 
 void UGenerateIslandComponent::DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY,
@@ -48,22 +52,84 @@ UGenerateIslandComponent::UGenerateIslandComponent()
 void UGenerateIslandComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	GridCells.Reserve(GridSize.X * GridSize.Y);
-	int sizeX = GridSize.X;
-	for (int x = 0; x < GridSize.X; x++)
-	{
-		for (int y = 0; y < GridSize.Y; y++)
-		{
-			FVector2D GridCell(x, y);
-			FCell cell{FVector{static_cast<double>(x), static_cast<double>(y), 0}};
-			GridCells.Add(cell, 0);
-		}
-	}
+	LoadCSVFile(TilePath, GridCells);
+
 	DrawGrid(FVector{0, 0, 0}, GridSize.X, GridSize.Y, SizePerCell);
 }
 
 void UGenerateIslandComponent::GetAllTiles()
 {
+}
+
+void UGenerateIslandComponent::LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells)
+{
+	// Construct the full file path
+	const FString FilePath = FPaths::ProjectContentDir() / FileName;
+
+	// Load the XML file
+	FXmlFile XmlFile(FilePath);
+
+	if (!XmlFile.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load XML file: %s"), *FilePath);
+		return;
+	}
+
+	FXmlNode* RootNode = XmlFile.GetRootNode();
+	if (!RootNode)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to get root node"));
+		return;
+	}
+
+	FXmlNode* LayerNode = RootNode->FindChildNode(TEXT("layer"));
+	if (!LayerNode)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to find layer node"));
+		return;
+	}
+
+	FXmlNode* DataNode = LayerNode->FindChildNode(TEXT("data"));
+	if (!DataNode)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to find data node"));
+		return;
+	}
+
+	FString CsvData = DataNode->GetContent();
+	TArray<TArray<int32>> ParsedData;
+
+	TArray<FString> Rows;
+	CsvData.ParseIntoArray(Rows, TEXT("\n"), true);
+
+	for (const FString& Row : Rows)
+	{
+		TArray<FString> Columns;
+		Row.ParseIntoArray(Columns, TEXT(","), true);
+
+		TArray<int32> ParsedRow;
+		for (const FString& Column : Columns)
+		{
+			ParsedRow.Add(FCString::Atoi(*Column));
+		}
+
+		ParsedData.Add(ParsedRow);
+	}
+	GridSize.X = Rows.Num();
+	GridSize.Y = ParsedData.Num();
+	for (int32 RowIndex = 0; RowIndex < ParsedData.Num(); ++RowIndex)
+	{
+		FString RowString;
+		for (int32 ColIndex = 0; ColIndex < ParsedData[RowIndex].Num(); ++ColIndex)
+		{
+			int32 Value = ParsedData[RowIndex][ColIndex];
+			RowString += FString::Printf(TEXT("%d "), Value);
+			FCell Cell(FVector{static_cast<double>(RowIndex), static_cast<double>(ColIndex), 0});
+			OutGridCells.Add(Cell, Value);
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("%s"), *RowString);
+	}
 }
 
 
