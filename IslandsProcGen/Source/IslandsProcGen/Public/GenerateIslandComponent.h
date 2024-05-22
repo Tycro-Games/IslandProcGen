@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+// used chatgpt
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "PaperTileMapComponent.h"
 #include "PaperTileLayer.h"
-#include "GenerateIslandComponent.generated.h"
 
+#include "GenerateIslandComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ISLANDSPROCGEN_API UGenerateIslandComponent : public UActorComponent
@@ -28,8 +28,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Island Mesh")
+	TObjectPtr<UStaticMesh> StaticMeshComponent;
+
 private:
 	UPaperTileMapComponent* TileMapComponent;
-	UPROPERTY(EditAnywhere)
-	UPaperTileSet* TileSet;
 };
