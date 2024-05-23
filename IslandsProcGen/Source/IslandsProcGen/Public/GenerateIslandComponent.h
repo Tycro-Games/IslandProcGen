@@ -66,7 +66,7 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Island Mesh")
-	TObjectPtr<UStaticMesh> StaticMeshComponent;
+	UStaticMesh* StaticMesh;
 
 	// Dictionary to hold grid cells
 	UPROPERTY(EditAnywhere, Category = "Grid")

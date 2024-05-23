@@ -52,13 +52,46 @@ UGenerateIslandComponent::UGenerateIslandComponent()
 void UGenerateIslandComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	LoadCSVFile(TilePath, GridCells);
 
 	DrawGrid(FVector{0, 0, 0}, GridSize.X, GridSize.Y, SizePerCell);
+	GetAllTiles();
 }
 
 void UGenerateIslandComponent::GetAllTiles()
 {
+	AActor* ParentActor = GetOwner();
+	for (const auto& Elem : GridCells)
+	{
+		if (Elem.Value != 0)
+		{
+			// Assuming FCell has a method to get the world position
+			FVector SpawnLocation = Elem.Key.Position * SizePerCell + SizePerCell / 2.0f;
+			FRotator SpawnRotation = FRotator::ZeroRotator;
+			FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = ParentActor;
+
+			// Spawn the actor
+			AActor* NewActor = GetWorld()->SpawnActor<AActor>(
+				AActor::StaticClass(), SpawnTransform, SpawnParams);
+			if (NewActor)
+			{
+				// Attach the new actor to the parent actor
+				FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
+				////NewActor->AttachToActor(ParentActor, AttachmentRules);
+				//NewActor->AttachToActor(ParentActor, AttachmentRules);
+				//// Add a StaticMeshComponent to the spawned actor
+				UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(NewActor);
+				StaticMeshComponent->AttachToComponent(NewActor->GetRootComponent(), AttachmentRules);
+				//// Set the mesh for the StaticMeshComponentS
+				StaticMeshComponent->RegisterComponent();
+				StaticMeshComponent->SetStaticMesh(StaticMesh);
+				StaticMeshComponent->SetRelativeLocation(SpawnLocation);
+			}
+		}
+	}
 }
 
 void UGenerateIslandComponent::LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells)
