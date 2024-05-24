@@ -88,6 +88,6 @@ public:
 
 private:
 	void GetAllTiles();
-	void CreateChildActor(FTransform Transform);
+	void CreateChildActor(const FTransform& Transform) const;
 	void LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells);
 };

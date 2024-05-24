@@ -82,51 +82,9 @@ void UGenerateIslandComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-//void UGenerateIslandComponent::GetAllTiles()
-//{
-//	AActor* ParentActor = GetOwner();
-//	for (const auto& Elem : GridCells)
-//	{
-//		// Assuming FCell has a method to get the world position
-//		FVector SpawnLocation = Elem.Key.Position * SizePerCell + SizePerCell / 2.0f;
-//		FRotator SpawnRotation = FRotator::ZeroRotator;
-//		FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
-//
-//		FActorSpawnParameters SpawnParams;
-//		SpawnParams.Owner = ParentActor;
-//
-//		UChildActorComponent* NewActor = NewObject<UChildActorComponent>(ParentActor);
-//
-//
-//		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
-//		//NewActor->AttachToActor(ParentActor, AttachmentRules);
-//		//// Add a StaticMeshComponent to the spawned actor
-//
-//		// Attach the new actor to the parent actor
-//		NewActor->RegisterComponent();
-//		NewActor->SetWorldTransform(SpawnTransform);
-//
-//		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(NewActor);
-//
-//		StaticMeshComponent->AttachToComponent(NewActor, AttachmentRules);
-//		//// Set the mesh for the StaticMeshComponent
-//		StaticMeshComponent->RegisterComponent();
-//		StaticMeshComponent->SetRelativeLocation(FVector{0});
-//		if (Elem.Value != 0)
-//		{
-//			// Spawn the actor
-//
-//			if (NewActor)
-//			{
-//				StaticMeshComponent->SetStaticMesh(StaticMesh);
-//			}
-//		}
-//	}
-//}
 
 void UGenerateIslandComponent::GetAllTiles()
 {
-	AActor* ParentActor = GetOwner();
 	for (const auto& Elem : GridCells)
 	{
 		if (Elem.Value != 0)
@@ -135,27 +93,28 @@ void UGenerateIslandComponent::GetAllTiles()
 			FVector SpawnLocation = Elem.Key.Position * SizePerCell + SizePerCell / 2.0f;
 			FRotator SpawnRotation = FRotator::ZeroRotator;
 			FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = ParentActor;
+
+			//FActorSpawnParameters SpawnParams;
+			//SpawnParams.Owner = ParentActor;
 
 			CreateChildActor(SpawnTransform);
 		}
 	}
 }
 
-void UGenerateIslandComponent::CreateChildActor(FTransform Transform)
+void UGenerateIslandComponent::CreateChildActor(const FTransform& Transform) const
 {
 	AActor* ParentActor = GetOwner();
 
-	UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(ParentActor);
-	if (ChildActorComponent)
+	if (UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(ParentActor))
 	{
 		ChildActorComponent->RegisterComponent();
 		ChildActorComponent->SetChildActorClass(ChildActorClass);
-		if (ChildActorComponent->AttachToComponent(ParentActor->GetRootComponent(),
+		ChildActorComponent->SetRelativeTransform(Transform);
+
+		if (ChildActorComponent->AttachToComponent(GetOwner()->GetRootComponent(),
 		                                           FAttachmentTransformRules::KeepRelativeTransform))
 		{
-			ChildActorComponent->SetRelativeTransform(Transform);
 			ChildActorComponent->CreateChildActor();
 		}
 	}
