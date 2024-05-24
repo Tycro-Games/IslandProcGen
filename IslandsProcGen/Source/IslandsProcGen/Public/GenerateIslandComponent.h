@@ -53,28 +53,31 @@ public:
 	void DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY, float CellSize);
 	// Sets default values for this component's properties
 	UGenerateIslandComponent();
+	//from 	   https://www.youtube.com/watch?v=7yP5C_LOYcU&list=PLBLmKCAjA25AzbbDhIVUdZeSc6o07pMfe&index=17
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+
+	void GenerateIsland();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
-	void GetAllTiles();
-	void LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells);
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Island Mesh")
-	UStaticMesh* StaticMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default Tile Actor")
+	TSubclassOf<AActor> ChildActorClass;
 
 	// Dictionary to hold grid cells
 	UPROPERTY(EditAnywhere, Category = "Grid")
-	TMap<FCell, int32> GridCells;
-	UPROPERTY(EditAnywhere, Category = "Grid")
 
-	FIntVector2 GridSize = {10, 10};
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	TMap<FCell, int32> GridCells;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid")
+
+	FIntPoint GridSize = {10, 10};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 
 	float SizePerCell = 200.0f;
 	UPROPERTY(EditAnywhere, Category = "Grid")
@@ -82,4 +85,8 @@ public:
 	FString TilePath = "island1.tmx";
 
 private:
+	TArray<UChildActorComponent*> ChildComponentActors;
+	void GetAllTiles();
+	void CreateChildActor(FTransform Transform);
+	void LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells);
 };

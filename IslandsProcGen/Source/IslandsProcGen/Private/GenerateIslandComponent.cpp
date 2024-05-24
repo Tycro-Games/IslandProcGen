@@ -3,6 +3,7 @@
 
 #include "GenerateIslandComponent.h"
 #include "GameFramework/Actor.h"
+#include "Engine/Blueprint.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 
@@ -11,11 +12,13 @@
 
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Editor/EditorEngine.h"
 
 
 void UGenerateIslandComponent::DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY,
                                         float CellSize)
 {
+	FlushPersistentDebugLines(GEditor->GetEditorWorldContext().World());
 	FVector LineStart, LineEnd;
 
 	// Draw horizontal lines
@@ -23,7 +26,7 @@ void UGenerateIslandComponent::DrawGrid(const FVector& Origin, int32 NumCellsX, 
 	{
 		LineStart = FVector(Origin.X, Origin.Y + Y * CellSize, Origin.Z);
 		LineEnd = FVector(Origin.X + NumCellsX * CellSize, Origin.Y + Y * CellSize, Origin.Z);
-		DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
+		DrawDebugLine(GEditor->GetEditorWorldContext().World(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
 		);
 	}
 
@@ -32,7 +35,7 @@ void UGenerateIslandComponent::DrawGrid(const FVector& Origin, int32 NumCellsX, 
 	{
 		LineStart = FVector(Origin.X + X * CellSize, Origin.Y, Origin.Z);
 		LineEnd = FVector(Origin.X + X * CellSize, Origin.Y + NumCellsY * CellSize, Origin.Z);
-		DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
+		DrawDebugLine(GEditor->GetEditorWorldContext().World(), LineStart, LineEnd, FColor::Purple, true, -1, 0, 10
 		);
 	}
 }
@@ -48,16 +51,71 @@ UGenerateIslandComponent::UGenerateIslandComponent()
 }
 
 
+void UGenerateIslandComponent::GenerateIsland()
+{
+	for (UChildActorComponent* ChildComponentActor : ChildComponentActors)
+	{
+		if (ChildComponentActor && !ChildComponentActor->IsBeingDestroyed())
+		{
+			ChildComponentActor->DestroyComponent();
+		}
+	}
+	ChildComponentActors.Empty();
+
+
+	LoadCSVFile(TilePath, GridCells);
+
+	DrawGrid(GetOwner()->GetActorLocation(), GridSize.X, GridSize.Y, SizePerCell);
+	GetAllTiles();
+}
+
 // Called when the game starts
 void UGenerateIslandComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	LoadCSVFile(TilePath, GridCells);
-
-	DrawGrid(FVector{0, 0, 0}, GridSize.X, GridSize.Y, SizePerCell);
-	GetAllTiles();
 }
+
+//void UGenerateIslandComponent::GetAllTiles()
+//{
+//	AActor* ParentActor = GetOwner();
+//	for (const auto& Elem : GridCells)
+//	{
+//		// Assuming FCell has a method to get the world position
+//		FVector SpawnLocation = Elem.Key.Position * SizePerCell + SizePerCell / 2.0f;
+//		FRotator SpawnRotation = FRotator::ZeroRotator;
+//		FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
+//
+//		FActorSpawnParameters SpawnParams;
+//		SpawnParams.Owner = ParentActor;
+//
+//		UChildActorComponent* NewActor = NewObject<UChildActorComponent>(ParentActor);
+//
+//
+//		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+//		//NewActor->AttachToActor(ParentActor, AttachmentRules);
+//		//// Add a StaticMeshComponent to the spawned actor
+//
+//		// Attach the new actor to the parent actor
+//		NewActor->RegisterComponent();
+//		NewActor->SetWorldTransform(SpawnTransform);
+//
+//		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(NewActor);
+//
+//		StaticMeshComponent->AttachToComponent(NewActor, AttachmentRules);
+//		//// Set the mesh for the StaticMeshComponent
+//		StaticMeshComponent->RegisterComponent();
+//		StaticMeshComponent->SetRelativeLocation(FVector{0});
+//		if (Elem.Value != 0)
+//		{
+//			// Spawn the actor
+//
+//			if (NewActor)
+//			{
+//				StaticMeshComponent->SetStaticMesh(StaticMesh);
+//			}
+//		}
+//	}
+//}
 
 void UGenerateIslandComponent::GetAllTiles()
 {
@@ -73,23 +131,26 @@ void UGenerateIslandComponent::GetAllTiles()
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = ParentActor;
 
-			// Spawn the actor
-			AActor* NewActor = GetWorld()->SpawnActor<AActor>(
-				AActor::StaticClass(), SpawnTransform, SpawnParams);
-			if (NewActor)
-			{
-				// Attach the new actor to the parent actor
-				FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
-				////NewActor->AttachToActor(ParentActor, AttachmentRules);
-				//NewActor->AttachToActor(ParentActor, AttachmentRules);
-				//// Add a StaticMeshComponent to the spawned actor
-				UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(NewActor);
-				StaticMeshComponent->AttachToComponent(NewActor->GetRootComponent(), AttachmentRules);
-				//// Set the mesh for the StaticMeshComponentS
-				StaticMeshComponent->RegisterComponent();
-				StaticMeshComponent->SetStaticMesh(StaticMesh);
-				StaticMeshComponent->SetRelativeLocation(SpawnLocation);
-			}
+			CreateChildActor(SpawnTransform);
+		}
+	}
+}
+
+void UGenerateIslandComponent::CreateChildActor(FTransform Transform)
+{
+	AActor* ParentActor = GetOwner();
+
+	UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(ParentActor);
+	if (ChildActorComponent)
+	{
+		ChildComponentActors.Add(ChildActorComponent);
+		ChildActorComponent->RegisterComponent();
+		ChildActorComponent->SetChildActorClass(ChildActorClass);
+		if (ChildActorComponent->AttachToComponent(ParentActor->GetRootComponent(),
+		                                           FAttachmentTransformRules::KeepRelativeTransform))
+		{
+			ChildActorComponent->SetRelativeTransform(Transform);
+			ChildActorComponent->CreateChildActor();
 		}
 	}
 }
