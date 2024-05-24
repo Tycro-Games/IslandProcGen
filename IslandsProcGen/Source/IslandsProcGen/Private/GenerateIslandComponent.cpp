@@ -51,16 +51,23 @@ UGenerateIslandComponent::UGenerateIslandComponent()
 }
 
 
-void UGenerateIslandComponent::GenerateIsland()
+void UGenerateIslandComponent::ClearAll()
 {
-	for (UChildActorComponent* ChildComponentActor : ChildComponentActors)
+	TArray<AActor*> ChildComponentActors;
+	GetOwner()->GetAllChildActors(ChildComponentActors);
+	for (AActor* ChildComponentActor : ChildComponentActors)
 	{
-		if (ChildComponentActor && !ChildComponentActor->IsBeingDestroyed())
+		if (ChildComponentActor && !ChildComponentActor->IsPendingKillPending())
 		{
-			ChildComponentActor->DestroyComponent();
+			ChildComponentActor->Destroy();
 		}
 	}
 	ChildComponentActors.Empty();
+}
+
+void UGenerateIslandComponent::GenerateIsland()
+{
+	ClearAll();
 
 
 	LoadCSVFile(TilePath, GridCells);
@@ -143,7 +150,6 @@ void UGenerateIslandComponent::CreateChildActor(FTransform Transform)
 	UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(ParentActor);
 	if (ChildActorComponent)
 	{
-		ChildComponentActors.Add(ChildActorComponent);
 		ChildActorComponent->RegisterComponent();
 		ChildActorComponent->SetChildActorClass(ChildActorClass);
 		if (ChildActorComponent->AttachToComponent(ParentActor->GetRootComponent(),

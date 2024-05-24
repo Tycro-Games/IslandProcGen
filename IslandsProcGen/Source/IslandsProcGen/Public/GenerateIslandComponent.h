@@ -53,9 +53,11 @@ public:
 	void DrawGrid(const FVector& Origin, int32 NumCellsX, int32 NumCellsY, float CellSize);
 	// Sets default values for this component's properties
 	UGenerateIslandComponent();
-	//from 	   https://www.youtube.com/watch?v=7yP5C_LOYcU&list=PLBLmKCAjA25AzbbDhIVUdZeSc6o07pMfe&index=17
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 
+	void ClearAll();
+	//from 	   https://www.youtube.com/watch?v=7yP5C_LOYcU&list=PLBLmKCAjA25AzbbDhIVUdZeSc6o07pMfe&index=17
+	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void GenerateIsland();
 
 protected:
@@ -85,7 +87,6 @@ public:
 	FString TilePath = "island1.tmx";
 
 private:
-	TArray<UChildActorComponent*> ChildComponentActors;
 	void GetAllTiles();
 	void CreateChildActor(FTransform Transform);
 	void LoadCSVFile(const FString& FileName, TMap<FCell, int32>& OutGridCells);
