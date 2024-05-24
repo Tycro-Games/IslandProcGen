@@ -56,7 +56,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 
 	void ClearAll();
-	//from 	   https://www.youtube.com/watch?v=7yP5C_LOYcU&list=PLBLmKCAjA25AzbbDhIVUdZeSc6o07pMfe&index=17
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void GenerateIsland();
 
@@ -69,8 +68,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default Tile Actor")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	TSubclassOf<AActor> ChildActorClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default Tile Actor")
+	USceneComponent* ParentTileActorsComponent;
 
 	// Dictionary to hold grid cells
 	UPROPERTY(EditAnywhere, Category = "Grid")

@@ -67,6 +67,25 @@ void UGenerateIslandComponent::ClearAll()
 
 void UGenerateIslandComponent::GenerateIsland()
 {
+	if (!ParentTileActorsComponent)
+	{
+		AActor* ParentActor = GetOwner();
+		USceneComponent* RootComponent = ParentActor->GetRootComponent();
+		ParentTileActorsComponent = NewObject<UChildActorComponent>(ParentActor);
+		if (ParentTileActorsComponent)
+		{
+			FVector SpawnLocation = GetOwner()->GetActorLocation();
+			FRotator SpawnRotation = FRotator::ZeroRotator;
+			FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
+			ParentTileActorsComponent->SetRelativeTransform(SpawnTransform);
+
+			if (ParentTileActorsComponent->AttachToComponent(RootComponent,
+			                                                 FAttachmentTransformRules::KeepRelativeTransform))
+			{
+				ParentTileActorsComponent->RegisterComponent();
+			}
+		}
+	}
 	ClearAll();
 
 
@@ -74,6 +93,7 @@ void UGenerateIslandComponent::GenerateIsland()
 
 	DrawGrid(GetOwner()->GetActorLocation(), GridSize.X, GridSize.Y, SizePerCell);
 	GetAllTiles();
+	GetOwner()->RerunConstructionScripts();
 }
 
 // Called when the game starts
@@ -105,17 +125,18 @@ void UGenerateIslandComponent::GetAllTiles()
 void UGenerateIslandComponent::CreateChildActor(const FTransform& Transform) const
 {
 	AActor* ParentActor = GetOwner();
+	USceneComponent* RootComponent = ParentTileActorsComponent;
 
 	if (UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(ParentActor))
 	{
-		ChildActorComponent->RegisterComponent();
 		ChildActorComponent->SetChildActorClass(ChildActorClass);
 		ChildActorComponent->SetRelativeTransform(Transform);
 
-		if (ChildActorComponent->AttachToComponent(GetOwner()->GetRootComponent(),
+		if (ChildActorComponent->AttachToComponent(RootComponent,
 		                                           FAttachmentTransformRules::KeepRelativeTransform))
 		{
 			ChildActorComponent->CreateChildActor();
+			ChildActorComponent->RegisterComponent();
 		}
 	}
 }
