@@ -79,7 +79,7 @@ public:
 	TMap<FCell, int32> GridCells;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid")
 
-	FIntPoint GridSize = {10, 10};
+	FIntPoint GridSize = {0, 0};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 
 	float SizePerCell = 200.0f;

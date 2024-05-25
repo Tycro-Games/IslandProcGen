@@ -91,9 +91,9 @@ void UGenerateIslandComponent::GenerateIsland()
 
 	LoadCSVFile(TilePath, GridCells);
 
-	DrawGrid(GetOwner()->GetActorLocation(), GridSize.X, GridSize.Y, SizePerCell);
 	GetAllTiles();
 	GetOwner()->RerunConstructionScripts();
+	DrawGrid(GetOwner()->GetActorLocation(), GridSize.X, GridSize.Y, SizePerCell);
 }
 
 // Called when the game starts
@@ -116,6 +116,8 @@ void UGenerateIslandComponent::GetAllTiles()
 
 			//FActorSpawnParameters SpawnParams;
 			//SpawnParams.Owner = ParentActor;
+			FString CombinedString = "Tile " + FString::FromInt(Elem.Key.Position.X) + "_" +
+				FString::FromInt(Elem.Key.Position.Y);
 
 			CreateChildActor(SpawnTransform);
 		}
@@ -136,7 +138,8 @@ void UGenerateIslandComponent::CreateChildActor(const FTransform& Transform) con
 		                                           FAttachmentTransformRules::KeepRelativeTransform))
 		{
 			ChildActorComponent->CreateChildActor();
-			ChildActorComponent->RegisterComponent();
+
+			//ChildActorComponent->Rename(*ActorName);
 		}
 	}
 }
