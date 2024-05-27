@@ -124,6 +124,7 @@ void UGenerateIslandComponent::GetAllTiles()
 	}
 }
 
+//Allen(233499) helped me get this thing right
 void UGenerateIslandComponent::CreateChildActor(const FTransform& Transform) const
 {
 	AActor* ParentActor = GetOwner();
@@ -207,7 +208,7 @@ void UGenerateIslandComponent::LoadCSVFile(const FString& FileName, TMap<FCell, 
 		{
 			int32 Value = ParsedData[RowIndex][ColIndex];
 			RowString += FString::Printf(TEXT("%d "), Value);
-			FCell Cell(FVector{static_cast<double>(RowIndex), static_cast<double>(ColIndex), 0});
+			FCell Cell(FVector{static_cast<double>(ColIndex), static_cast<double>(RowIndex), 0});
 			OutGridCells.Add(Cell, Value);
 		}
 
